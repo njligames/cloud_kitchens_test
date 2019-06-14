@@ -1,13 +1,14 @@
 class PriorityQueue(object):
     def __init__(self):
         self.queue = []
+        self.name = "pqueue"
 
     def __str__(self):
-        return ' '.join([str(i) for i in self.queue])
+        return self.name + ": " + ' '.join([str(i) for i in self.queue])
 
     # for checking if the queue is empty
     def empty(self):
-        return len(self.queue) == []
+        return self.qsize() <= 0
 
     def qsize(self):
         return len(self.queue)
@@ -26,9 +27,9 @@ class PriorityQueue(object):
             item = self.queue[min]
             del self.queue[min]
             return item
-        except IndexError:
-            print()
-            exit()
+        except IndexError as err:
+            print(err)
+            # exit()
 
     def peek(self):
         try:
@@ -38,9 +39,29 @@ class PriorityQueue(object):
                     min = i
             item = self.queue[min]
             return item
-        except IndexError:
-            print()
-            exit()
+        except IndexError as err:
+            print(err)
+            # exit()
 
-    def __str__(self):
-        return str(self.queue)
+    def set_name(self, name):
+        self.name = str(name)
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    # All lists must not be empty.
+    def min(self, pq_list):
+        min_pq = self
+        for pq in pq_list:
+            if not pq.empty() and not min_pq.empty():
+                if pq.peek() < min_pq.peek():
+                    min_pq = pq
+        return min_pq
+
+    def max(self, pq_list):
+        max_pq = self
+        for pq in pq_list:
+            if pq.peek() > max_pq.peek:
+                max_pq = pq
+        return max_pq
+

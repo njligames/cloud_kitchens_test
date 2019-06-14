@@ -17,53 +17,76 @@ class Order:
 
     def calculate_value(self):
         orderAge = time.time() - self.orderTime
-        decayRate = self.decayRate
-        if(self.overFlow):
-            decayRate *= 2
 
         # print("orderAge", orderAge)
-        value = (self.shelfLife - orderAge) - (decayRate * orderAge)
+        value = (self.shelfLife - orderAge) - (self.get_decay_rate() * orderAge)
         # print('calculated value: ', value)
         return value
 
     def calculate_normalized(self):
         return self.calculate_value() / self.shelfLife
 
+    def get_decay_rate(self):
+        decayRate = self.decayRate
+        if(self.overFlow):
+            decayRate *= 2
+        return decayRate
+
+    def value_decay_amount(self):
+        # Derived from value function.
+        # value = ([self life] - [order age] - ([decay rate] * [order age]))
+        # Where the order age equals the shelf life
+        # Returns how much this order will decay.
+
+        v = (self.get_decay_rate() * self.shelfLife)
+        return v
+
+    # Since decayRate is 0 < decayRate <= 1, the
+    #   closer value_decay_amount is to zero, the faster it decays.
+    def lowest_value_decay(self, other):
+        vd = self.value_decay_amount()
+        other_vd = other.value_decay_amount()
+
+        # Whichever one is closer to zero has the highest value decay.
+        if vd < other_vd:
+            return self
+        return other
+
     def __str__(self):
         return self.name
 
     def __gt__(self, other):
-        if(self.shelfLife > other.shelfLife):
+        if(self.value_decay_amount() > other.value_decay_amount()):
             return True
         else:
             return False
 
     def __lt__(self, other):
-        if(self.shelfLife < other.shelfLife):
+        if(self.value_decay_amount() < other.value_decay_amount()):
             return True
         else:
             return False
 
     def __ge__(self, other):
-        if(self.shelfLife >= other.shelfLife):
+        if(self.value_decay_amount() >= other.value_decay_amount()):
             return True
         else:
             return False
 
     def __le__(self, other):
-        if(self.shelfLife <= other.shelfLife):
+        if(self.value_decay_amount() <= other.value_decay_amount()):
             return True
         else:
             return False
 
     def __eq__(self, other):
-        if(self.shelfLife == other.shelfLife):
+        if(self.value_decay_amount() == other.value_decay_amount()):
             return True
         else:
             return False
 
     def __ne__(self, other):
-        if(self.shelfLife != other.shelfLife):
+        if(self.value_decay_amount() != other.value_decay_amount()):
             return True
         else:
             return False

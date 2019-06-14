@@ -1,0 +1,8 @@
+[
+  {
+    "name": "Banana Split",
+    "temp": "frozen",
+    "shelfLife": 20,
+    "decayRate": 0.63
+  }
+]
