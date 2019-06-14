@@ -46,8 +46,14 @@ class PriorityQueue(object):
     def set_name(self, name):
         self.name = str(name)
 
+    def get_name(self, name):
+        return self.name
+
     def __eq__(self, other):
         return self.name == other.name
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     # All lists must not be empty.
     def min(self, pq_list):

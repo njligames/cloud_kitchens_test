@@ -8,6 +8,17 @@ class Order:
         self.decayRate = decayRate
         self.orderTime = None #time.time()
         self.overFlow = False
+        self.normalizedValue = 0
+
+    def mark_sent(self):
+        self.normalizedValue = self.calculate_normalized()
+        return self.normalizedValue
+
+    def get_normalized_value(self):
+        return self.normalizedValue
+
+    def reset_sent(self):
+        self.normalizedValue = 0
 
     def set_order_time(self):
         self.orderTime = time.time()
