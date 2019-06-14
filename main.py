@@ -60,7 +60,6 @@ def parse_json_order(order):
     decayRate = order["decayRate"]
 
     o = Order(name, temp, shelfLife, decayRate)
-    # print(o)
 
     return o
 
@@ -71,39 +70,39 @@ def queue_order(json_order, hot_shelf_queue, cold_shelf_queue, frozen_shelf_queu
 
     if "frozen" == json_order["temp"]:
         if frozen_shelf_queue.qsize() < 15:
-            print('added to frozen')
+            print('Added `' + str(order) + '` to the Frozen shelf')
             frozen_shelf_queue.put(order)
         else:
             if overflow_shelf_queue.qsize() < 20:
-                print('added to overflow')
+                print('Added `' + str(order) + '` to the Overflow shelf')
                 order.enable_overflow()
                 overflow_shelf_queue.put(order)
             else:
-                print('added to waste during PRODUCTION')
+                print('Wasted `' + str(order) + '` during PRODUCTION')
                 waste_array.append(order)
     elif "cold" == json_order["temp"]:
         if cold_shelf_queue.qsize() < 15:
-            print('added to cold')
+            print('Added `' + str(order) + '` to the Cold shelf')
             cold_shelf_queue.put(order)
         else:
             if overflow_shelf_queue.qsize() < 20:
-                print('added to overflow')
+                print('Added `' + str(order) + '` to the Overflow shelf')
                 order.enable_overflow()
                 overflow_shelf_queue.put(order)
             else:
-                print('added to waste during PRODUCTION')
+                print('Wasted `' + str(order) + '` during PRODUCTION')
                 waste_array.append(order)
     elif "hot" == json_order["temp"]:
         if hot_shelf_queue.qsize() < 15:
-            print('added to hot')
+            print('Added `' + str(order) + '` to the Hot shelf')
             hot_shelf_queue.put(order)
         else:
             if overflow_shelf_queue.qsize() < 20:
-                print('added to overflow')
+                print('Added `' + str(order) + '` to the Overflow shelf')
                 order.enable_overflow()
                 overflow_shelf_queue.put(order)
             else:
-                print('added to waste during PRODUCTION')
+                print('Wasted `' + str(order) + '` during PRODUCTION')
                 waste_array.append(order)
     else:
         print('Error: There is an unaccounted order temperature.')
@@ -133,7 +132,7 @@ def produce_orders(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overfl
 
                 if order_file_queue.qsize() > 0:
                     order = order_file_queue.get()
-                    # print("Number of Order Left", order_file_queue.qsize())
+                    print("Number of Order Left", order_file_queue.qsize())
 
                     queue_order(order, hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, waste_array)
                     # print("queued order " + str(order))
@@ -163,7 +162,7 @@ def cleanup_shelf(pq, waste_array):
 
     for i in cleanup_list:
         order = pq.queue[i]
-        print('added to waste during CLEANUP')
+        print('Wasted `' + str(order) + '` during CLEANUP')
         waste_array.append(order)
         del pq.queue[i]
 
@@ -172,12 +171,16 @@ def cleanup_shelf(pq, waste_array):
     return False
 
 def adjust_shelves(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, waste_array, sent_array, driver_queue, order_removed):
-    pass
+    shelves = [hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue]
 
-    # if overflow_shelf_queue.qsize() < 20:
+    # put_queue = None
+    # for shelf in shelves:
+    #     if shelf is not None and order_removed is not None:
+    #         if shelf.get_name() == order_removed.get_name():
+    #             put_queue = shelf
+
+    # if put_queue is not None:
     #     pass
-    # else:
-    #     print('adjusted shelves even though the overflow shelf was full')
 
 def cleanup_shelves(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, waste_array, sent_array, driver_queue):
     should_update_display = False
@@ -243,7 +246,7 @@ def consume_orders(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overfl
 
                     # print("got order", str(order))
                     sent_array.append(order)
-                    print("sent order `" + str(order) + "` with Normalized Value = " + str(normalized_value))
+                    print("Sent `" + str(order) + "` with Normalized Value = " + str(normalized_value))
 
                     update_display(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, waste_array, sent_array, driver_queue)
 

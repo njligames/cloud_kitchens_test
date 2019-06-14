@@ -18,7 +18,7 @@ class PriorityQueue(object):
         self.queue.append(data)
 
     # for popping an element based on Priority
-    def get(self):
+    def get(self, special_condition=lambda a:True):
         try:
             min = 0
             for i in range(len(self.queue)):
