@@ -11,6 +11,8 @@ class PriorityQueue(object):
         return self.qsize() <= 0
 
     def qsize(self):
+        if not self.queue:
+            return 0
         return len(self.queue)
 
     # for inserting an element in the queue
@@ -19,11 +21,14 @@ class PriorityQueue(object):
 
     # for popping an element based on Priority
     def get(self, special_condition=lambda a:True):
+
+        # print("The special condition is", special_condition(1))
         try:
             min = 0
             for i in range(len(self.queue)):
-                if self.queue[i] < self.queue[min]:
-                    min = i
+                if True == special_condition(self.queue[i]):
+                    if self.queue[i] < self.queue[min]:
+                        min = i
             item = self.queue[min]
             del self.queue[min]
             return item
@@ -46,7 +51,7 @@ class PriorityQueue(object):
     def set_name(self, name):
         self.name = str(name)
 
-    def get_name(self, name):
+    def get_name(self):
         return self.name
 
     def __eq__(self, other):

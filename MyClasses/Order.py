@@ -10,6 +10,9 @@ class Order:
         self.overFlow = False
         self.normalizedValue = 0
 
+    def get_temp(self):
+        return self.temp
+
     def mark_sent(self):
         self.normalizedValue = self.calculate_normalized()
         return self.normalizedValue
@@ -64,6 +67,9 @@ class Order:
         return other
 
     def __str__(self):
+        return self.name
+
+    def get_name(self):
         return self.name
 
     def __gt__(self, other):
