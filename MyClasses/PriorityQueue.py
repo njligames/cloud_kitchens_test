@@ -22,7 +22,6 @@ class PriorityQueue(object):
     # for popping an element based on Priority
     def get(self, special_condition=lambda a:True):
 
-        # print("The special condition is", special_condition(1))
         try:
             min = 0
             for i in range(len(self.queue)):

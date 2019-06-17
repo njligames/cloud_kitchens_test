@@ -65,11 +65,9 @@ def parse_json_order(order):
 
 def queue_to_overflow(order, overflow_shelf_queue, waste_array):
     if overflow_shelf_queue.qsize() < 20:
-        print('Added `' + str(order) + '` to the Overflow shelf')
         order.enable_overflow()
         overflow_shelf_queue.put(order)
     else:
-        print('Wasted `' + str(order) + '` during PRODUCTION')
         waste_array.append(order)
 
 def queue_order(order, hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, waste_array):
@@ -78,19 +76,16 @@ def queue_order(order, hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, ov
 
     if "frozen" == order.get_temp():
         if frozen_shelf_queue.qsize() < 15:
-            print('Added `' + str(order) + '` to the Frozen shelf')
             frozen_shelf_queue.put(order)
         else:
             queue_to_overflow(order, overflow_shelf_queue, waste_array)
     elif "cold" == order.get_temp():
         if cold_shelf_queue.qsize() < 15:
-            print('Added `' + str(order) + '` to the Cold shelf')
             cold_shelf_queue.put(order)
         else:
             queue_to_overflow(order, overflow_shelf_queue, waste_array)
     elif "hot" == order.get_temp():
         if hot_shelf_queue.qsize() < 15:
-            print('Added `' + str(order) + '` to the Hot shelf')
             hot_shelf_queue.put(order)
         else:
             queue_to_overflow(order, overflow_shelf_queue, waste_array)
@@ -105,45 +100,30 @@ def add_seconds(tm, secs):
 def produce_orders(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, driver_queue, orders_thread, waste_array, sent_array, event):
     order_file_queue = orders_thread.get()
 
-    print("Number of Order Start", order_file_queue.qsize())
 
     start = time.time()
     while not event.is_set() or order_file_queue.qsize() > 0:
-        # print("producing")
 
         elapsed_seconds = time.time() - start
-        # print(elapsed_seconds)
 
         if elapsed_seconds >= 1.0:
             start = time.time()
             order_count = np.random.poisson(3.25)
-            # print(order_count, order_file_queue.qsize())
             for i in range(1, order_count + 1):
 
                 if order_file_queue.qsize() > 0:
                     json_order = order_file_queue.get()
-                    print("Number of Order Left", order_file_queue.qsize())
 
                     order = parse_json_order(json_order)
                     queue_order(order, hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, waste_array)
-                    # queue_to_overflow(order, overflow_shelf_queue, waste_array)
-                    # print("queued order " + str(order))
 
                     update_display(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, waste_array, sent_array, driver_queue)
 
-                    # print('updated display')
-                    # finished, summon driver
                     start_time = datetime.datetime.now()
-                    # print('start_time', start_time)
                     seconds_to_drive = random.randint(2, 10)
-                    # print('seconds_to_drive', seconds_to_drive)
                     arrive_time = start_time + datetime.timedelta(seconds=seconds_to_drive)
-                    # arrive_time = add_seconds(start_time, seconds_to_drive)
-                    # print('arrive_time', arrive_time)
                     driver_queue.put(arrive_time)
-                    # print("driver_queue.qsize()", driver_queue.qsize())
 
-    print("exiting produce_orders")
 
 def cleanup_shelf(pq, waste_array):
     cleanup_list = []
@@ -154,7 +134,6 @@ def cleanup_shelf(pq, waste_array):
 
     for i in cleanup_list:
         order = pq.queue[i]
-        print('Wasted `' + str(order) + '` during CLEANUP')
         waste_array.append(order)
         del pq.queue[i]
 
@@ -210,7 +189,6 @@ def cleanup_shelves(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overf
 def consume_orders(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, driver_queue, waste_array, sent_array, event):
 
     while not event.is_set() or driver_queue.qsize() > 0:
-        # print("consuming: " + str(driver_queue.qsize()))
 
         cleanup_shelves(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, waste_array, sent_array, driver_queue)
 
@@ -218,33 +196,25 @@ def consume_orders(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overfl
             current_time = datetime.datetime.now()
             first_available_time = driver_queue.peek()
 
-            # print("time", current_time, first_available_time)
 
             if current_time >= first_available_time:
                 driver_queue.get()
-                # Driver Arrived
-                # print('driver arrived', driver_queue.qsize())
 
-                # Find the order with the lowest value_decay_amount
                 min_queue = None
                 queue_list = []
                 if hot_shelf_queue.qsize() > 0:
-                    # print("hot_shelf_queue.qsize()", hot_shelf_queue.qsize())
                     min_queue = hot_shelf_queue
                     queue_list.append(hot_shelf_queue)
 
                 if cold_shelf_queue.qsize() > 0:
-                    # print("cold_shelf_queue.qsize()", cold_shelf_queue.qsize())
                     min_queue = cold_shelf_queue
                     queue_list.append(cold_shelf_queue)
 
                 if frozen_shelf_queue.qsize() > 0:
-                    # print("frozen_shelf_queue.qsize()", frozen_shelf_queue.qsize())
                     min_queue = frozen_shelf_queue
                     queue_list.append(frozen_shelf_queue)
 
                 if overflow_shelf_queue.qsize() > 0:
-                    # print("overflow_shelf_queue.qsize()", overflow_shelf_queue.qsize())
                     min_queue = overflow_shelf_queue
                     queue_list.append(overflow_shelf_queue)
 
@@ -258,13 +228,10 @@ def consume_orders(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overfl
                     if overflow_shelf_queue != min_queue:
                         adjust_shelves(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, waste_array, sent_array, driver_queue, order)
 
-                    # print("got order", str(order))
                     sent_array.append(order)
-                    print("Sent `" + str(order) + "` with Normalized Value = " + str(normalized_value))
 
                     update_display(hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, waste_array, sent_array, driver_queue)
 
-    print("exited consume_orders")
 
 def main():
 
@@ -296,13 +263,14 @@ def main():
 
         pqueues = [hot_shelf_queue, cold_shelf_queue, frozen_shelf_queue, overflow_shelf_queue, driver_queue]
 
-        while True:
+        can_set_event = True
+        while can_set_event:
+            time.sleep(10)
+
             can_set_event = True
-            while pq in pqueues:
-                if pq.pqsize() > 0:
-                    can_set_event = False
-            if can_set_event:
-                break
+            for pq in pqueues:
+                if pq.qsize() > 0:
+                    can_set_event = can_set_event and False
 
         event.set()
 

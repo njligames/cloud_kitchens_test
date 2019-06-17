@@ -32,9 +32,7 @@ class Order:
     def calculate_value(self):
         orderAge = time.time() - self.orderTime
 
-        # print("orderAge", orderAge)
         value = (self.shelfLife - orderAge) - (self.get_decay_rate() * orderAge)
-        # print('calculated value: ', value)
         return value
 
     def calculate_normalized(self):
